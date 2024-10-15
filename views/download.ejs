@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download | inShare</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+</head>
+<body>
+    <section class="drop flex items-center justify-center ">
+        <div class="container flex items-center justify-center">
+                <div class="drop-zone-img">
+                    <img src="/img/download-sd.svg" alt="" draggable="false" class="center">
+                </div>
+                
+                <div class="title flex items-center">
+                    <% if(locals.error){ %>
+                        <h4><%= locals.error %></h4>
+                        <% } else { %>
+                    <h2>Your file is ready to download</h2>
+                    <p>Link expire in 24 hours</p>
+                    <h5><%= fileName %></h5>
+                    <small><%= parseInt(fileSize/1000) %> KB</small>
+            
+                    <div class="submitButton flex items-center justify-center">
+                        <a href="<%= downloadLink %>"><button type="submit" class="submit-email-btn">Download file</button></a>
+                    </div>
+                    <% } %>
+                </div>
+            
+        </div>
+    </section>
+</body>
+</html>
