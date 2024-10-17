@@ -1,11 +1,23 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const cors = require('cors');
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 
+//cors
+const corsOptions = {
+    origin: process.env.ALLOWED_CLIENTS.split(',')
+}
+
+app.use(cors(corsOptions));
+
 //Static files
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../fileSharing')));
+
+
 
 app.use(express.json());
 
