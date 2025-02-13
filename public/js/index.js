@@ -71,7 +71,7 @@ const uploadFile = () => {
 
     formData.append("myfile", file);
 
-    
+    console.log("Uploading File:", file);
     
     xhr.onreadystatechange = () => {
         if (xhr.readyState === 4 && xhr.status === 200) {
