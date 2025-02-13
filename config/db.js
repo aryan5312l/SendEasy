@@ -13,6 +13,7 @@ function connectDB(){
 
     connection.on('error', (err) => {
         console.log('Connection failed: ', err);
+        process.exit(1); // Exit if unable to connect
     })
 }
 
