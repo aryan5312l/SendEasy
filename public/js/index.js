@@ -10,7 +10,7 @@ let sharingContainer = document.querySelector('.sharing-container');
 let copyBtn = document.querySelector('.copyBtn');
 let emailForm = document.querySelector('.emailForm');
 let toast = document.querySelector('.toast');
-
+//https://sendeasy.onrender.com/
 let host = 'https://sendeasy.onrender.com/';
 let uploadURL = `${host}api/files`;
 let emailURL = `${host}api/files/send`
@@ -87,9 +87,9 @@ const uploadFile = () => {
 
     xhr.onload = function () {
         if (xhr.status === 200) {
-            //console.log("File uploaded successfully");
+            console.log("File uploaded successfully");
         } else {
-            //console.error("File upload failed");
+            console.error("File upload failed");
         }
     };
 
@@ -126,7 +126,7 @@ const uploadFile = () => {
 
 const showLink = ({file: url}) => {
     fileURL.value = url;
-    //console.log(url);
+    console.log(url);
 }
 
 emailForm.addEventListener('submit', (e) =>{
