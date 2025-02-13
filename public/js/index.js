@@ -34,7 +34,7 @@ dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragged');
     const files = e.dataTransfer.files;
-    console.table(files);
+    //console.table(files);
     if(files.length){
         fileInput.files = files;
         uploadFile();

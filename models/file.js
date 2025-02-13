@@ -9,6 +9,7 @@ const fileSchema = new Schema({
     uuid: {type: String, required: true},
     sender: {type: String, required: false},
     receiver: {type: String, required: false},
+    expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), index: { expires: '24h' } }
 }, {timestamps: true});
 
 module.exports = mongoose.model('File', fileSchema);
