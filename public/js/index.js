@@ -60,9 +60,13 @@ copyBtn.addEventListener('click', () => {
 });
 
 const uploadFile = () => {
+    if (!fileInput.files.length) {
+        showToast("Please select a file");
+        return;
+    }
     bgProgressContainer.style.display = 'block';
     const file = fileInput.files[0];
-    const formData = new FormData;
+    const formData = new FormData();
     const xhr = new XMLHttpRequest();
 
     formData.append("myfile", file);
