@@ -11,7 +11,7 @@ let copyBtn = document.querySelector('.copyBtn');
 let emailForm = document.querySelector('.emailForm');
 let toast = document.querySelector('.toast');
 
-let host = 'http://localhost:3000/';
+let host = 'https://sendeasy.onrender.com';
 let uploadURL = `${host}api/files`;
 let emailURL = `${host}api/files/send`
 
