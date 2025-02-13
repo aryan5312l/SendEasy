@@ -11,7 +11,7 @@ let copyBtn = document.querySelector('.copyBtn');
 let emailForm = document.querySelector('.emailForm');
 let toast = document.querySelector('.toast');
 
-let host = 'https://sendeasy.onrender.com';
+let host = 'https://sendeasy.onrender.com/';
 let uploadURL = `${host}api/files`;
 let emailURL = `${host}api/files/send`
 
@@ -70,8 +70,15 @@ const uploadFile = () => {
     
     
     xhr.onreadystatechange = () => {
-        //console.log(xhr.readyState);
-        showLink(JSON.parse(xhr.response));
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                showLink(response);
+            } catch (e) {
+                console.error("Invalid JSON Response", xhr.responseText);
+                showToast("Error: Invalid response from server.");
+            }
+        }
     };
 
     xhr.onload = function () {

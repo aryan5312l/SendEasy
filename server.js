@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3000;
 
 //cors
 const corsOptions = {
-    origin: process.env.ALLOWED_CLIENTS.split(',')
-}
+    origin: process.env.ALLOWED_CLIENTS ? process.env.ALLOWED_CLIENTS.split(',') : "*",
+    methods: ["GET", "POST"]
+};
 
 app.use(cors(corsOptions));
 
