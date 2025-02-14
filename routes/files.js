@@ -1,55 +1,68 @@
+require('dotenv').config();
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
 const File = require('../models/file');
 const { v4: uuid4 } = require('uuid');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-let storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-        cb(null, uniqueName);
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Set up Multer with Cloudinary Storage
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'uploads', // Cloudinary folder name
+        format: async (req, file) => file.mimetype.split('/')[1], // Get file format dynamically
+        public_id: (req, file) => `${Date.now()}-${Math.round(Math.random() * 1E9)}`
     }
-})
+});
 
+const upload = multer({ storage });
+/*
 let upload = multer({
     storage,
     limits: { fileSize: 1000000 * 100 },
 
 }).single('myfile');
+*/
 
-
-router.post('/', (req, res) => {
-    upload(req, res, async (err) => {
-        console.log("Received file:", req.file); // 🔍 Check if file is received
-
-        // Validate request
+router.post('/', upload.single('myfile'), async (req, res) => {
+    try {
+        console.log("Headers:", req.headers);  // ✅ Debug headers
+        console.log("Received file:", req.file); // 🔍 Debugging
+        console.log("File Received:", req.file);
         if (!req.file) {
             return res.status(400).json({ error: 'No file received' });
         }
+        // Modify Cloudinary URL to enforce download
+        const fileUrl = req.file.path.replace('/upload/', '/upload/fl_attachment/');
+        // Store in Database
+        const file = new File({
+            filename: req.file.filename,
+            originalname: req.file.originalname,
+            uuid: uuid4(),
+            public_id: req.file.public_id,
+            path: fileUrl,
+            size: req.file.size
+        });
 
-        if (err) {
-            return res.status(500).send({ error: err.message });
-        }
+        const response = await file.save();
+        console.log("File saved in DB:", response); // 🔍 Debugging log
 
-        // Store in DataBase
-        try {
-            const file = new File({
-                filename: req.file.filename,
-                uuid: uuid4(),
-                path: req.file.path,
-                size: req.file.size
-            });
+        return res.json({ file: `${process.env.APP_BASE_URL}/files/${response.uuid}` });
 
-            const response = await file.save();
-            console.log("File saved in DB:", response); // 🔍 Debugging log
-
-            return res.json({ file: `${process.env.APP_BASE_URL}/files/${response.uuid}` });
-        } catch (dbError) {
-            console.error("Database Error:", dbError);
-            return res.status(500).json({ error: 'Database save failed' });
-        }
-    });
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ error: 'File upload failed' });
+    }
 });
 
 router.post('/send', async (req, res) => {

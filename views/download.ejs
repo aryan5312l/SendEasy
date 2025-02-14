@@ -24,7 +24,9 @@
                     <small><%= parseInt(fileSize/1000) %> KB</small>
             
                     <div class="submitButton flex items-center justify-center">
-                        <a href="<%= downloadLink %>"><button type="submit" class="submit-email-btn">Download file</button></a>
+                        <a href="<%= downloadLink %>" download="<%= fileName %>">
+                            <button type="button" class="submit-email-btn">Download file</button>
+                        </a>
                     </div>
                     <% } %>
                 </div>

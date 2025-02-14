@@ -71,25 +71,40 @@ const uploadFile = () => {
 
     formData.append("myfile", file);
 
+    console.log("FormData Contents:");
+    for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);  // Should log: "myfile", File object
+    }
+
     console.log("Uploading File:", file);
     
-    xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                showLink(response);
-            } catch (e) {
-                console.error("Invalid JSON Response", xhr.responseText);
-                showToast("Error: Invalid response from server.");
+    // Modify the success handler in xhr.onreadystatechange
+xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (xhr.status === 200) {
+                console.log("✅ File uploaded successfully:", response);
+                // Show sharing container ONLY after successful response
+                bgProgressContainer.style.display = 'none';
+                sharingContainer.style.display = 'block'; // Move this here
+                if (response.file) {
+                    showLink(response.file);
+                }
             }
+        } catch (e) {
+            // Error handling remains the same
         }
-    };
+    }
+};
+    
 
     xhr.onload = function () {
-        if (xhr.status === 200) {
-            console.log("File uploaded successfully");
+        if (xhr.status >= 200 && xhr.status < 300) {
+            console.log("✅ File uploaded successfully:", xhr.responseText);
         } else {
-            console.error("File upload failed");
+            console.error("❌ File upload failed:", xhr.status, xhr.responseText);
+            showToast(`Error: ${xhr.responseText}`);
         }
     };
 
@@ -99,35 +114,25 @@ const uploadFile = () => {
         showToast("Error while Uploading");
     };
 
-    xhr.upload.onprogress = (e) => {
-        if(e.lengthComputable){
-            let percent = (e.loaded/e.total) * 100;
-            //console.log(`Total uploaded ${percent}%`);
-            bgProgress.style.width = `${percent}%`;
-            percentV.innerText = percent.toFixed(2);
-            progressBar.style.width = `${percent}%`;
-
-            if (percent >= 100) {
-                // Hide the progress container after a short delay (for smooth transition)
-                setTimeout(() => {
-                    document.querySelector('.bg-progress-container').style.display = 'none';
-                    sharingContainer.style.display = 'block';
-                }, 500);
-                
-            }
-            
-        }
+    // Update the progress event handler
+xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+        let percent = (e.loaded / e.total) * 100;
+        bgProgress.style.width = `${percent}%`;
+        percentV.innerText = percent.toFixed(2);
+        progressBar.style.width = `${percent}%`;
     }
+};
 
     xhr.open('POST', uploadURL, true);
     xhr.send(formData);
     
 }
 
-const showLink = ({file: url}) => {
+const showLink = (url) => {
     fileURL.value = url;
     console.log(url);
-}
+};
 
 emailForm.addEventListener('submit', (e) =>{
     e.preventDefault();
