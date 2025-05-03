@@ -6,7 +6,7 @@ const File = require('../models/file');
 const { v4: uuid4 } = require('uuid');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
-
+const {nanoid} = require('nanoid');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -14,6 +14,8 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+const slug = nanoid(6);
 
 // Set up Multer with Cloudinary Storage
 const storage = new CloudinaryStorage({
@@ -57,7 +59,7 @@ router.post('/', upload.single('myfile'), async (req, res) => {
         const response = await file.save();
         console.log("File saved in DB:", response); // 🔍 Debugging log
 
-        return res.json({ file: `${process.env.APP_BASE_URL}/files/${response.uuid}` });
+        return res.json({ file: `${process.env.APP_BASE_URL}/s/${slug}` });
 
     } catch (error) {
         console.error("Error:", error);

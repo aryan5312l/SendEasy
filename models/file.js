@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const fileSchema = new Schema({
     filename: {type: String, required: true},
     originalname: {type: String},
-    
+    slug: {type: String, required: true, unique: true},
     path: {type: String, required: true},
     size: {type: Number, required: true},
     uuid: {type: String, required: true},

@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 //cors
 const corsOptions = {
     origin: process.env.ALLOWED_CLIENTS ? process.env.ALLOWED_CLIENTS.split(',') : "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "OPTIONS"]
 };
 
 app.use(express.json());
@@ -19,10 +19,6 @@ app.use(cors(corsOptions));
 //Static files
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(express.static(path.join(__dirname, '../fileSharing')));
-
-
-
-
 
 //template
 app.set('views', path.join(__dirname, '/views'));
@@ -41,6 +37,7 @@ connectDB();
 app.use('/api/files', require('./routes/files'));
 app.use('/files', require('./routes/show'));
 app.use('/files/download', require('./routes/download'));
+app.use('/s', require('./routes/short'));
 //app.use('/api/files', require('./routes/files'));
 
 
