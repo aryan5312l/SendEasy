@@ -53,7 +53,8 @@ router.post('/', upload.single('myfile'), async (req, res) => {
             uuid: uuid4(),
             public_id: req.file.public_id,
             path: fileUrl,
-            size: req.file.size
+            size: req.file.size,
+            slug: slug
         });
 
         const response = await file.save();
