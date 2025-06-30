@@ -45,7 +45,10 @@ router.post('/', upload.single('myfile'), async (req, res) => {
             return res.status(400).json({ error: 'No file received' });
         }
         // Modify Cloudinary URL to enforce download
-        const fileUrl = req.file.path.replace('/upload/', '/upload/fl_attachment/');
+        const urlParts = req.file.path.split('/upload/');
+        const filenameForDownload = req.file.originalname.substring(0, req.file.originalname.lastIndexOf('.')) || req.file.originalname;
+        const fileUrl = `${urlParts[0]}/upload/fl_attachment:${filenameForDownload}/${urlParts[1]}`;
+        
         // Store in Database
         const file = new File({
             filename: req.file.filename,
