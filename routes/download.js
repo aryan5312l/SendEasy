@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const File = require('../models/file');
+const axios = require('axios');
 
 router.get('/:uuid', async (req, res) => {
     try {
@@ -9,8 +10,21 @@ router.get('/:uuid', async (req, res) => {
             return res.render('download', { error: 'Link has expired' });
         }
 
-        // Redirect to the file path
-        return res.redirect(file.path);
+        // Proxy raw file downloads to set the correct filename
+        if (file.path.includes('/raw/')) {
+            const cloudinaryUrl = file.path.split('?')[0]; // Use direct URL, no fl_attachment
+            const response = await axios({
+                url: cloudinaryUrl,
+                method: 'GET',
+                responseType: 'stream'
+            });
+            res.setHeader('Content-Disposition', `attachment; filename="${file.originalname}"`);
+            res.setHeader('Content-Type', file.mimetype || 'application/octet-stream');
+            response.data.pipe(res);
+        } else {
+            // For images, just redirect
+            return res.redirect(file.path);
+        }
     } catch (error) {
         console.error(error);
         return res.render('download', { error: 'Internal Server Error' });

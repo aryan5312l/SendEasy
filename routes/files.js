@@ -15,15 +15,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const slug = nanoid(6);
-
 // Set up Multer with Cloudinary Storage
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'uploads', // Cloudinary folder name
-        format: async (req, file) => file.mimetype.split('/')[1], // Get file format dynamically
-        public_id: (req, file) => `${Date.now()}-${Math.round(Math.random() * 1E9)}`
+        folder: 'uploads',
+        format: async (req, file) => file.mimetype.startsWith('image/') ? file.mimetype.split('/')[1] : undefined,
+        public_id: (req, file) => `${Date.now()}-${Math.round(Math.random() * 1E9)}`,
+        resource_type: (req, file) => file.mimetype.startsWith('image/') ? 'image' : 'raw'
     }
 });
 
@@ -44,11 +43,19 @@ router.post('/', upload.single('myfile'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file received' });
         }
-        // Modify Cloudinary URL to enforce download
-        const urlParts = req.file.path.split('/upload/');
-        const filenameForDownload = req.file.originalname.substring(0, req.file.originalname.lastIndexOf('.')) || req.file.originalname;
-        const fileUrl = `${urlParts[0]}/upload/fl_attachment:${filenameForDownload}/${urlParts[1]}`;
+        // Determine resource type from the path
+        const resourceType = req.file.path.includes('/raw/') ? 'raw' : 'image';
+        let fileUrl;
+        if (resourceType === 'raw') {
+            fileUrl = req.file.path; // direct URL, no fl_attachment
+        } else {
+            const urlParts = req.file.path.split('/upload/');
+            fileUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
+        }
         
+        // Generate a unique slug for each upload
+        const slug = nanoid(6);
+
         // Store in Database
         const file = new File({
             filename: req.file.filename,
