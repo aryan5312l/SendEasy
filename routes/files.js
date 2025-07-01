@@ -56,12 +56,14 @@ router.post('/', upload.single('myfile'), async (req, res) => {
         // Generate a unique slug for each upload
         const slug = nanoid(6);
 
+        console.log("req.file: ", req.file);
+
         // Store in Database
         const file = new File({
             filename: req.file.filename,
             originalname: req.file.originalname,
             uuid: uuid4(),
-            public_id: req.file.public_id,
+            public_id: req.file.filename,
             path: fileUrl,
             size: req.file.size,
             slug: slug
@@ -69,6 +71,7 @@ router.post('/', upload.single('myfile'), async (req, res) => {
 
         const response = await file.save();
         console.log("File saved in DB:", response); // 🔍 Debugging log
+        console.log("public_id:", req.file.public_id);
 
         return res.json({ file: `${process.env.APP_BASE_URL}/s/${slug}` });
 

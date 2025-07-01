@@ -16,6 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
+//Cleanup service
+require('./services/cleanupService');
+
 //Static files
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(express.static(path.join(__dirname, '../fileSharing')));
