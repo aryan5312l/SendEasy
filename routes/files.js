@@ -7,6 +7,7 @@ const { v4: uuid4 } = require('uuid');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 const {nanoid} = require('nanoid');
+const { uploadLimiter } = require('../middlewares/rateLimiter');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -35,7 +36,7 @@ let upload = multer({
 }).single('myfile');
 */
 
-router.post('/', upload.single('myfile'), async (req, res) => {
+router.post('/', uploadLimiter, upload.single('myfile'), async (req, res) => {
     try {
         console.log("Headers:", req.headers);  // ✅ Debug headers
         console.log("Received file:", req.file); // 🔍 Debugging
