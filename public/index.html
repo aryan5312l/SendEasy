@@ -6,6 +6,7 @@
     <title>SendEasy File Sharing</title>
     <link rel="stylesheet" href="/css/style-m.css">
     <link rel="stylesheet" href="/css/utilities-m.css">
+    
 
 </head>
 <body>
@@ -20,9 +21,12 @@
                 </div>
                 <div class="title">
                     <input type="file" class="file">
-                    Drop your files here or, <span class="fileBtn">browse</span>
+                    <span class="file-size-limit" style="color: var(--primary); font-weight: bold; display: block; margin-top: 8px; font-size: 10px; text-align: center;">Maximum file size allowed: 30MB</span>
+                    Drop your files here or, <span class="fileBtn">Browse</span>
 
                 </div>
+
+                
             </div>
 
             <div class="bg-progress-container flex items-center justify-center">
@@ -33,6 +37,14 @@
                         <div class="progress-bar"></div>
                     </div>
                 
+            </div>
+
+            <div class="file-uploaded-message" style="display:none; text-align:center; font-size:1.2rem; color:#4BB543; font-weight:bold;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4BB543" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                <span style="margin-left: 10px;">File uploaded!</span>
+            </div>
+            <div class="generating-link-message" style="display:none; text-align:center; font-size:1.1rem; color:#333; font-weight:500;">
+                Generating link... <span class="spinner">⏳</span>
             </div>
 
             <div class="sharing-container flex items-center justify-center">

@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 //Cleanup function
-cron.schedule('0 * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
     const now = new Date();
     const expiredFiles = await File.find({createdAt: {$lt: now - 24 * 60 * 60 * 1000}});
     for(const file of expiredFiles){

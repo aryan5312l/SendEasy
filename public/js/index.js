@@ -10,6 +10,8 @@ let sharingContainer = document.querySelector('.sharing-container');
 let copyBtn = document.querySelector('.copyBtn');
 let emailForm = document.querySelector('.emailForm');
 let toast = document.querySelector('.toast');
+let fileUploadedMsg = document.querySelector('.file-uploaded-message');
+let generatingLinkMsg = document.querySelector('.generating-link-message');
 //https://sendeasy.onrender.com/
 let host = '/';
 let uploadURL = `${host}api/files`;
@@ -64,8 +66,28 @@ const uploadFile = () => {
         showToast("Please select a file");
         return;
     }
-    bgProgressContainer.style.display = 'block';
+
     const file = fileInput.files[0];
+    if (file.size > 30 * 1024 * 1024) { // 30MB in bytes
+        showToast("File size exceeds 30MB limit!");
+        fileInput.value = ""; // Clear the input
+        return;
+    }
+
+    // Show progress container with initial state
+    bgProgressContainer.style.display = 'block';
+    bgProgressContainer.style.opacity = '1';
+    sharingContainer.style.display = 'none';
+    fileUploadedMsg.style.display = 'none';
+    generatingLinkMsg.style.display = 'none';
+    
+    // Reset progress indicators
+    percentV.innerText = '0';
+    bgProgress.style.width = '0%';
+    progressBar.style.width = '0%';
+    bgProgress.style.transition = 'none';
+    progressBar.style.transition = 'none';
+
     const formData = new FormData();
     const xhr = new XMLHttpRequest();
 
@@ -78,26 +100,40 @@ const uploadFile = () => {
 
     console.log("Uploading File:", file);
     
-    // Modify the success handler in xhr.onreadystatechange
-xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-        try {
-            const response = JSON.parse(xhr.responseText);
-            if (xhr.status === 200) {
-                console.log("✅ File uploaded successfully:", response);
-                // Show sharing container ONLY after successful response
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            let percent = (e.loaded / e.total) * 100;
+            bgProgress.style.width = `${percent}%`;
+            percentV.innerText = percent.toFixed(2);
+            progressBar.style.width = `${percent}%`;
+            if (percent >= 100) {
                 bgProgressContainer.style.display = 'none';
-                sharingContainer.style.display = 'block'; // Move this here
-                if (response.file) {
-                    showLink(response.file);
-                }
+                fileUploadedMsg.style.display = 'block';
+                setTimeout(() => {
+                    fileUploadedMsg.style.display = 'none';
+                    generatingLinkMsg.style.display = 'block';
+                }, 700);
             }
-        } catch (e) {
-            // Error handling remains the same
         }
-    }
-};
-    
+    };
+
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+            generatingLinkMsg.style.display = 'none';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (xhr.status === 200) {
+                    console.log("✅ File uploaded successfully:", response);
+                    sharingContainer.style.display = 'block';
+                    if (response.file) {
+                        showLink(response.file);
+                    }
+                }
+            } catch (e) {
+                // Error handling remains the same
+            }
+        }
+    };
 
     xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -108,26 +144,14 @@ xhr.onreadystatechange = () => {
         }
     };
 
-    // Define what happens in case of an error
     xhr.onerror = function () {
-        //console.error("An error occurred while uploading the file.");
         showToast("Error while Uploading");
+        generatingLinkMsg.style.display = 'none';
     };
-
-    // Update the progress event handler
-xhr.upload.onprogress = (e) => {
-    if (e.lengthComputable) {
-        let percent = (e.loaded / e.total) * 100;
-        bgProgress.style.width = `${percent}%`;
-        percentV.innerText = percent.toFixed(2);
-        progressBar.style.width = `${percent}%`;
-    }
-};
 
     xhr.open('POST', uploadURL, true);
     xhr.send(formData);
-    
-}
+};
 
 const showLink = (url) => {
     fileURL.value = url;

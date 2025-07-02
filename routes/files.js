@@ -27,7 +27,10 @@ const storage = new CloudinaryStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+    storage,
+    limits: {fileSize: 30 * 1024 * 1024}
+});
 /*
 let upload = multer({
     storage,
@@ -77,7 +80,10 @@ router.post('/', uploadLimiter, upload.single('myfile'), async (req, res) => {
         return res.json({ file: `${process.env.APP_BASE_URL}/s/${slug}` });
 
     } catch (error) {
-        console.error("Error:", error);
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ error: 'File too large. Maximum size is 30MB.' });
+        }
+        console.error("Upload error:", error);
         return res.status(500).json({ error: 'File upload failed' });
     }
 });
