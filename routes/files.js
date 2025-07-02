@@ -97,7 +97,10 @@ router.post('/send', async (req, res) => {
     }
 
     //Get data from database
-    const file = await File.findOne({ uuid: uuid });
+    const file = await File.findOne({ slug: uuid });
+    if (!file) {
+        return res.status(404).send({ error: 'File not found' });
+    }
     if (file.sender) {
         return res.status(422).send({ error: 'Email already sent' });
     }
@@ -122,7 +125,6 @@ router.post('/send', async (req, res) => {
     });
 
     return res.send({ success: 'Email Sent' });
-
 })
 
 module.exports = router;

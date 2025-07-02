@@ -12,6 +12,14 @@ let emailForm = document.querySelector('.emailForm');
 let toast = document.querySelector('.toast');
 let fileUploadedMsg = document.querySelector('.file-uploaded-message');
 let generatingLinkMsg = document.querySelector('.generating-link-message');
+let selectedFileInfo = document.querySelector('.selected-file-info');
+let fileDetails = document.querySelector('.file-details');
+let cancelUploadBtn = document.querySelector('.cancel-upload-btn');
+let currentXhr = null;
+let fileChip = document.querySelector('.file-chip');
+let fileChipName = document.querySelector('.file-chip-name');
+let fileChipSize = document.querySelector('.file-chip-size');
+
 //https://sendeasy.onrender.com/
 let host = '/';
 let uploadURL = `${host}api/files`;
@@ -44,6 +52,12 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) {
+        const file = fileInput.files[0];
+        fileChipName.textContent = file.name;
+        fileChipSize.textContent = `(${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    }
+    // Don't show chip yet, only show during upload
     uploadFile();
 });
 
@@ -53,26 +67,41 @@ fileBtn.addEventListener('click', () => {
 
 copyBtn.addEventListener('click', () => {
     fileURL.select();
-    // Temporarily change the selection color
-    //fileURL.style.setProperty('::selection', 'background: gray; color: white;');
     document.execCommand('copy');
     showToast("Link Copied");
-    // Deselect the input after copying to avoid the blue highlight
-    //window.getSelection().removeAllRanges();
+});
+
+cancelUploadBtn.addEventListener('click', () => {
+    if (currentXhr) {
+        currentXhr.abort();
+    }
+    fileInput.value = '';
+    fileChip.style.display = 'none';
+    bgProgressContainer.style.display = 'none';
+    fileUploadedMsg.style.display = 'none';
+    generatingLinkMsg.style.display = 'none';
+    sharingContainer.style.display = 'none';
+    showToast('Upload canceled');
 });
 
 const uploadFile = () => {
     if (!fileInput.files.length) {
         showToast("Please select a file");
+        fileChip.style.display = 'none';
         return;
     }
 
     const file = fileInput.files[0];
     if (file.size > 30 * 1024 * 1024) { // 30MB in bytes
         showToast("File size exceeds 30MB limit!");
-        fileInput.value = ""; // Clear the input
+        fileInput.value = ""; 
+        fileChip.style.display = 'none';
         return;
     }
+
+    // Show file chip and cancel button during upload
+    fileChip.style.display = 'flex';
+    cancelUploadBtn.style.display = 'inline-block';
 
     // Show progress container with initial state
     bgProgressContainer.style.display = 'block';
@@ -90,6 +119,7 @@ const uploadFile = () => {
 
     const formData = new FormData();
     const xhr = new XMLHttpRequest();
+    currentXhr = xhr;
 
     formData.append("myfile", file);
 
@@ -120,6 +150,8 @@ const uploadFile = () => {
     xhr.onreadystatechange = () => {
         if (xhr.readyState === 4) {
             generatingLinkMsg.style.display = 'none';
+            // Hide cancel button, but keep chip visible
+            cancelUploadBtn.style.display = 'none';
             try {
                 const response = JSON.parse(xhr.responseText);
                 if (xhr.status === 200) {
@@ -147,6 +179,16 @@ const uploadFile = () => {
     xhr.onerror = function () {
         showToast("Error while Uploading");
         generatingLinkMsg.style.display = 'none';
+        fileChip.style.display = 'none';
+    };
+
+    xhr.onabort = function () {
+        showToast('Upload canceled');
+        fileChip.style.display = 'none';
+        bgProgressContainer.style.display = 'none';
+        fileUploadedMsg.style.display = 'none';
+        generatingLinkMsg.style.display = 'none';
+        sharingContainer.style.display = 'none';
     };
 
     xhr.open('POST', uploadURL, true);
@@ -181,6 +223,7 @@ emailForm.addEventListener('submit', (e) =>{
     })
     showToast("Email Sent");
     sharingContainer.style.display = 'none';
+    fileChip.style.display = 'none';
 })
 
 let toastTimer;
